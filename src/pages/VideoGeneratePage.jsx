@@ -1,5 +1,5 @@
+import GenerateText from "@/components/GenerateText";
 import React, { useState } from "react";
-import ChatOpenAi from "@/components/ChatOpenAi";
 
 const VideoGeneratePage = () => {
   return (
@@ -16,10 +16,11 @@ const VideoGeneratePage = () => {
               (Limit: 9 images, its will take long time to generate)
             </span>
           </li>
-          <li></li>
+          <li>Upload your sound (file mp3)</li>
+          <li>Click generate your video and wait 😀</li>
         </ul>
       </div>
-      <ChatOpenAi />
+      <GenerateText />
     </div>
   );
 };

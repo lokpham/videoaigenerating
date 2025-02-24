@@ -3,12 +3,11 @@ import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
 const ffmpeg = new FFmpeg();
 
-const VideoMaker = ({ imageUrls, audioFile }) => {
+const VideoMaker = ({ imageUrls, audioFile, script }) => {
   const [videoUrl, setVideoUrl] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const createVideo = async () => {
-    // Check if we have images and an audio file
     if (!imageUrls.length || !audioFile) {
       alert("Both images and audio file are required.");
       return;
@@ -16,44 +15,100 @@ const VideoMaker = ({ imageUrls, audioFile }) => {
 
     setIsProcessing(true);
 
+    // Hàm lấy thời lượng của audio
+    const getAudioDuration = (audioFile) =>
+      new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(audioFile);
+        const audio = new Audio(url);
+        audio.addEventListener("loadedmetadata", () => {
+          const duration = audio.duration;
+          URL.revokeObjectURL(url);
+          resolve(duration);
+        });
+        audio.addEventListener("error", (err) => {
+          URL.revokeObjectURL(url);
+          reject(err);
+        });
+      });
+
+    // Hàm định dạng thời gian cho file SRT (hh:mm:ss,ms)
+    const formatTime = (seconds) => {
+      const date = new Date(0);
+      date.setSeconds(seconds);
+      // ISO string trả về dạng "HH:MM:SS.sssZ", ta lấy phần HH:MM:SS,ms
+      return date.toISOString().substr(11, 12).replace(".", ",");
+    };
+
+    // Hàm tạo file phụ đề SRT dựa trên script và thời lượng audio
+    const createSubtitles = async (script, durationAudio) => {
+      const words = script.split(" ");
+      // Giả sử ta chia script thành các đoạn 2 giây
+      const segmentDuration = 2;
+      let currentTime = 0;
+      let subtitleContent = "";
+      let index = 1;
+      // Tính số từ cần dùng cho mỗi đoạn
+      const wordsPerSegment = Math.floor(
+        words.length / (durationAudio / segmentDuration)
+      );
+      for (let i = 0; i < words.length; i += wordsPerSegment) {
+        let start = currentTime;
+        let end = Math.min(currentTime + segmentDuration, durationAudio);
+        let text = words.slice(i, i + wordsPerSegment).join(" ");
+        subtitleContent += `${index}\n`;
+        subtitleContent += `${formatTime(start)} --> ${formatTime(end)}\n`;
+        subtitleContent += `${text}\n\n`;
+        currentTime = end;
+        index++;
+        if (currentTime >= durationAudio) break;
+      }
+      await ffmpeg.writeFile(
+        "subtitles.srt",
+        new TextEncoder().encode(subtitleContent)
+      );
+    };
+
     try {
-      // Load the FFmpeg instance with logging enabled for debugging
+      const durationAudio = await getAudioDuration(audioFile);
+
+      // Load FFmpeg với logging bật để debug nếu cần
       await ffmpeg.load({ log: true });
 
-      // Write the uploaded audio file to FFmpeg's virtual file system
+      // Ghi file audio vào hệ thống file ảo của FFmpeg
       const audioFilename = "audio.mp3";
       await ffmpeg.writeFile(audioFilename, await fetchFile(audioFile));
 
-      // Calculate the duration for each image (total video length is 25 seconds)
-      let duration = 25 / imageUrls.length;
+      // Tạo file phụ đề dựa trên script
+      await createSubtitles(script, durationAudio);
 
-      // Process each image URL: fetch, convert to arrayBuffer, and write to FFmpeg FS
+      // Tính thời lượng cho mỗi ảnh
+      const imageDuration = durationAudio / imageUrls.length;
+
+      // Xử lý từng ảnh: fetch, chuyển về arrayBuffer, và ghi vào hệ thống file của FFmpeg
       const inputText = await Promise.all(
         imageUrls.map(async (url, index) => {
           const response = await fetch(url);
           const arrayBuffer = await response.arrayBuffer();
           const filename = `image${index}.png`;
           await ffmpeg.writeFile(filename, new Uint8Array(arrayBuffer));
-
-          // Return the formatted text line for FFmpeg's concat demuxer
-          return `file '${filename}'\nduration ${duration}`;
+          // Trả về dòng text cho concat demuxer
+          return `file '${filename}'\nduration ${imageDuration}`;
         })
       );
-      console.log("FFmpeg input lines:", inputText);
 
-      console.log("Processing images and audio...");
-
-      // Append the last image to ensure the video ends cleanly
+      // Thêm ảnh cuối để đảm bảo video kết thúc đúng thời gian
       const lastImage = `image${imageUrls.length - 1}.png`;
-      const inputWithLastImage = `${inputText.join("\n")}\nfile '${lastImage}'\n`;
+      const inputWithLastImage = `${inputText.join(
+        "\n"
+      )}\nfile '${lastImage}'\n`;
 
-      // Write the concat file list (input.txt) to FFmpeg FS
+      // Ghi file danh sách ảnh (input.txt) vào hệ thống file của FFmpeg
       await ffmpeg.writeFile(
         "input.txt",
         new TextEncoder().encode(inputWithLastImage)
       );
 
-      // Execute FFmpeg to create the video using the concat demuxer
+      // Thực thi FFmpeg: sử dụng concat demuxer, kết hợp audio và nhúng phụ đề
       await ffmpeg.exec([
         "-f",
         "concat",
@@ -63,6 +118,8 @@ const VideoMaker = ({ imageUrls, audioFile }) => {
         "input.txt",
         "-i",
         audioFilename,
+        "-vf",
+        "subtitles=subtitles.srt",
         "-c:v",
         "libx264",
         "-c:a",
@@ -73,7 +130,7 @@ const VideoMaker = ({ imageUrls, audioFile }) => {
         "output.mp4",
       ]);
 
-      // Read the resulting video file and create a blob URL
+      // Đọc file video kết quả và tạo URL blob để hiển thị
       const data = await ffmpeg.readFile("output.mp4");
       const videoBlob = new Blob([data.buffer], { type: "video/mp4" });
       const videoUrl = URL.createObjectURL(videoBlob);
@@ -88,7 +145,9 @@ const VideoMaker = ({ imageUrls, audioFile }) => {
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h2 className="font-bold">We are ready for your video. Let's get started!</h2>
+      <h2 className="font-bold">
+        We are ready for your video. Let's get started!
+      </h2>
       <button
         className="py-2 px-5 text-center rounded-sm hover:opacity-70 shadow-sm mt-2 text-white bg-gray-500"
         onClick={createVideo}

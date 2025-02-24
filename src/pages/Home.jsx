@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MessageWelcome from "@/components/MessageWelcome";
 import VideoMaker from "@/components/VideoMaker";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
 
 const data = {
   user_content: "",
@@ -15,19 +16,37 @@ const data = {
   state: false,
   audio: null,
   image: [
-    "https://cdn.mos.cms.futurecdn.net/Bp2M5emh8kRY3kBWRYKAYD-1100-80.jpg",
-    "https://images.unsplash.com/photo-1739993655680-4b7050ed2896?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    "https://images.unsplash.com/photo-1667806393680-725881a3c625?q=80&w=2076&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    "https://images.unsplash.com/photo-1667287476215-6fcc503c0a73?q=80&w=1930&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    "https://images.unsplash.com/photo-1664348504675-a5e72e98259e?q=80&w=1950&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    "https://images.unsplash.com/photo-1706856377447-98891f04ff0c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "http://localhost:5173/anh1.jpg",
+    "http://localhost:5173/anh2.jpg",
+    "http://localhost:5173/anh3.jpg",
+    "http://localhost:5173/anh4.jpg",
+    "http://localhost:5173/anh5.jpg",
+    "http://localhost:5173/anh6.jpg",
   ],
 };
 
 const Home = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
+  const ffmpeg = new FFmpeg();
 
+  const checkLibassSupport = async () => {
+    try {
+      // Load ffmpeg nếu chưa load
+      if (!ffmpeg.loaded) {
+        await ffmpeg.load({ log: true });
+      }
+      // Lấy thông tin version của ffmpeg
+      const { stdout } = await ffmpeg.run("-version");
+      // Kiểm tra xem dòng cấu hình có chứa "--enable-libass" không
+      if (stdout.includes("--enable-libass")) {
+        console.log("co libass");
+      } else {
+      }
+    } catch (error) {
+      console.error("Error checking libass support:", error);
+    }
+  };
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file && file.type === "audio/mpeg") {
@@ -37,11 +56,12 @@ const Home = () => {
       alert("Please upload a valid MP3 file.");
     }
   };
-
+  useEffect(() => {
+    checkLibassSupport();
+  });
   return (
     <div>
       <MessageWelcome />
-
       <div>
         <input type="file" accept="audio/mp3" onChange={handleFileChange} />
         {selectedFile && <p>Selected file: {selectedFile.name}</p>}
@@ -54,7 +74,11 @@ const Home = () => {
         </audio>
       )}
       {selectedFile && (
-        <VideoMaker audioFile={selectedFile} imageUrls={data.image} />
+        <VideoMaker
+          audioFile={selectedFile}
+          imageUrls={data.image}
+          script={data.script}
+        />
       )}
     </div>
   );

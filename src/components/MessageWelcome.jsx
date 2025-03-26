@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const MessageWelcome = () => {
-  const message = "Welcome to us!";
+  const message = "Welcome to us! Here is steps to create your video with our AI";
   const [displayedText, setDisplayedText] = useState("");
   const [index, setIndex] = useState(0);
   useEffect(() => {

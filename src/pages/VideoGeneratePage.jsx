@@ -25,7 +25,7 @@ import { LuSend, LuMenu } from "react-icons/lu";
 
 import ChatSidebar from "@/components/ChatSidebar";
 import MessageWelcome from "@/components/MessageWelcome";
-import { Account } from "@/components/Account";
+import { Infomation } from "@/components/Infomation";
 
 
 const ratios = createListCollection({
@@ -97,7 +97,7 @@ const VideoGeneratePage = () => {
         gap="2"
       >
         <ColorModeButton />
-        <Account />
+        <Infomation />
       </Flex>
 
       {/* Mobile menu toggle button */}
@@ -185,6 +185,7 @@ const VideoGeneratePage = () => {
               boxShadow="lg" 
               borderRadius="xl" 
               bg="white"
+              overflow='hidden' 
               _dark={{
                 bg: "gray.800"
               }}

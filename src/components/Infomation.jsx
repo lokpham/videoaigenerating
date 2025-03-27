@@ -11,8 +11,11 @@ import {
   LuUser , 
   LuDock  
 } from 'react-icons/lu';
+// import { useNavigate } from 'react-router';
 
-export const Account = () => {
+export const Infomation = () => {
+  // const navigate = useNavigate()
+
   return (
     <Menu.Root>
       <Menu.Trigger

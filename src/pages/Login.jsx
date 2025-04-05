@@ -6,201 +6,128 @@ import {
   Input,
   Stack,
   Text,
-  Link
+  Link,
+  VStack
 } from '@chakra-ui/react';
-import { Checkbox } from '@/components/ui/checkbox';
 import { toaster, Toaster } from '@/components/ui/toaster';
 import { useColorModeValue } from '@/components/ui/color-mode';
-import { FaFacebook } from 'react-icons/fa';
 import { useNavigate } from 'react-router';
 import { useState } from 'react';
+import api from '@/api';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
-  const [isLoading, setLoading] = useState(false);
+  // const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const bgColor = useColorModeValue('white', 'black');
+  const borderColor = useColorModeValue('gray.200', 'black.700');
   const navigate = useNavigate();
 
-  const handleRegister = () => { 
-    // console.log('Navigating to registration page');
-    navigate('/register');
-  }
-
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setIsLoading(true);
 
-    //Giả API
-    console.log("Form submission: ", email, password, rememberMe);
-
-    setTimeout(() => {
-      setLoading(false);
-      console.log("Login success");
-
+    if (!email || !password) {
       toaster.create({
-        title: 'Successfully',
-        position: 'top right',
+        title: 'Missing Fields',
+        description: 'Please enter your username and password.',
+        type: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    try {
+      const response = await api.post('/auth/login', {
+        email,
+        password,
+      });
+      console.log("Response FE: ",response.data);
+
+      // Lưu access token vào 
+      localStorage.setItem('accessToken', response.data.accessToken)
+      toaster.create({
+        title: 'Login Successful',
+        description: 'You have been logged in successfully.',
         type: 'success',
-      })
-      navigate('/generator')
-    }, 1000);
-
-  //   try {
-  //     const response = await fetch('http://your-nodejs-api/api/login', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({ email, password }),
-  //     })
-
-  //     const data = await response.json
-
-  //     if(response.ok) { 
-  //       localStorage.setItem('token', data.token)
-  //       navigate('/generator')
-  //     } else {
-  //       // Show error message
-  //       toast({
-  //         title: 'error',
-  //         description:  data.message || 'Login error',
-  //         position: 'top-right',
-  //         duration: 3000,
-  //         isClosable: true,
-  //       })
-  //     }
-  //   } catch(e) {
-  //     console.error(e)
-  //     toaster.create({
-  //       title: 'Error',
-  //       description: 'Something went wrong. Please try again.',
-  //       status: 'error',
-  //       duration: 3000,
-  //       isClosable: true,
-  //     })
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }
-
-  // const handleForgot = (e) => {
-  //   // Perform password reset logic here
-  // } 
+        duration: 1000, 
+        isClosable: true,
+      });
+      navigate('/generator');
+    } catch (error) {
+      console.error("Login error:", error.response?.data); // Thêm log để debug
+      toaster.create({
+        title: 'Login Error',
+        description: error.response?.data?.message || 'An unexpected error occurred. Please try again.',
+        type: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   } 
   return (
-    <Flex
-      minH="100vh"
-      align="center"
-      justify="center"
-      bg="blue.500"
-      p={4}
-    >
-      <Toaster/>
-      <Box
-        bg={bgColor}
-        p={8}
-        rounded="md"
-        boxShadow="md"
-        w="full"
-        maxW="md"
-      >
-        <form onSubmit={handleSubmit}>
-          <Stack spacing={6}>
-            <Text
-              fontSize="2xl"
-              fontWeight="bold"
-              textAlign="center"
-            >
-              Sign In
+    <Flex minH="100vh" align="center" justify="center" bg="blue.500" p={4}>
+      <Toaster />
+      <Box bg={bgColor} p={8} rounded="md" boxShadow="md" w="full" maxW="md">
+        <form onSubmit={handleLogin}>
+          <VStack spacing={6} align="stretch">
+            <Text fontSize="2xl" fontWeight="bold" textAlign="center" mb={2}>
+              Login
             </Text>
-            
-            {/* Social login button */}
-            <Flex justify="center">
-              <Button
-                variant="outline"
-                borderRadius="md"
-                size="lg"
-                h="60px"
-                w="60px"
-                onClick={() => console.log('Facebook login clicked')}
-                type="button"
-              >
-                <FaFacebook size={24} />
-              </Button>
-            </Flex>
-            
-            <Flex align="center">
-              <Box flex={1} h="1px" bg="gray.300" />
-              <Text px={4} color="gray.500">or</Text>
-              <Box flex={1} h="1px" bg="gray.300" />
-            </Flex>
-            
-            {/* Login form */}
+
             <Stack spacing={4}>
               <Box>
-                <label>Email</label>
+                <label fontWeight="medium"> Email</label>
                 <Input
-                  type="email"
-                  placeholder="Your email address"
+                  type="text"
+                  placeholder="Your username or email"
+                  size="lg"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  borderColor={borderColor}
                   required
                 />
               </Box>
-              
+
               <Box>
-                <label>Password</label>
+                <label fontWeight="medium">Password</label>
                 <Input
                   type="password"
                   placeholder="Your password"
+                  size="lg"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  borderColor={borderColor}
                   required
                 />
               </Box>
-              
-              <Flex justify="space-between" align="center">
-                <Checkbox 
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                >
-                  Remember me
-                </Checkbox>
-                <Link 
-                  color="blue.500"
-                  onClick={() => console.log('Forgot password clicked')} //navigate('/forgotPass') }
-                >
-                  Forgot Password?
-                </Link>
-              </Flex>
-              
+
               <Button
                 type="submit"
-                bg="gray.800"
+                bg="#1a202c"
                 color="white"
-                _hover={{ bg: 'gray.700' }}
                 size="lg"
+                _hover={{ bg: 'gray.700' }}
+                mt={2}
                 isLoading={isLoading}
-                loadingText="Signing In"
+                loadingText="Logging in"
               >
                 SIGN IN
               </Button>
             </Stack>
-            
-            <Text textAlign="center">
+
+            <Text textAlign="center" pt={4}>
               Don't have an account?{' '}
-              <Link 
-                color="blue.500" 
-                fontWeight="semibold"
-                onClick={handleRegister}
-              >
+              <Link color="blue.500" fontWeight="semibold" onClick={() => navigate('/register')}>
                 Sign Up
               </Link>
             </Text>
-          </Stack>
+          </VStack>
         </form>
       </Box>
     </Flex>

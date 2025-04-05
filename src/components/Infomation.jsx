@@ -11,11 +11,34 @@ import {
   LuUser , 
   LuDock  
 } from 'react-icons/lu';
-// import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
+import { toaster } from '@/components/ui/toaster';
+import api from '@/api'
 
 export const Infomation = () => {
-  // const navigate = useNavigate()
-
+  const navigate = useNavigate()
+  const handleLogout = async () => {
+      try {
+        await api.post('/auth/logout');
+        localStorage.removeItem('accessToken');
+        toaster.create({
+          title: 'Logout Successful',
+          description: 'You have been logged out.',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        navigate('/login');
+      } catch (error) {
+        toaster.create({
+          title: 'Logout Error',
+          description: error.response?.data?.message || 'Unable to logout. Please try again.',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    };
   return (
     <Menu.Root>
       <Menu.Trigger
@@ -81,12 +104,14 @@ export const Infomation = () => {
                 Settings
               </Menu.Item>
               <Menu.Item 
+
                 icon={<LuLogOut size={16} />}
                 color="red.500"
                 _hover={{ 
                   bg: 'red.600',  
                   color: 'black' 
                 }}
+                onClick={handleLogout}
               >
                 Logout
               </Menu.Item>

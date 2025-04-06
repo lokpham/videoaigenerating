@@ -11,9 +11,15 @@ import {
 } from '@chakra-ui/react';
 import { toaster, Toaster } from '@/components/ui/toaster';
 import { useColorModeValue } from '@/components/ui/color-mode';
+
 import { useNavigate } from 'react-router';
 import { useState } from 'react';
 import api from '@/api';
+import { useAtom } from "jotai";
+import { 
+  loginAtom,
+  userAtom
+ } from "@/atoms/authAtom";
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -24,6 +30,8 @@ const Login = () => {
   const bgColor = useColorModeValue('white', 'black');
   const borderColor = useColorModeValue('gray.200', 'black.700');
   const navigate = useNavigate();
+  const [,login] = useAtom(loginAtom); // Lấy hàm login từ authAtom
+  const [user] = useAtom(userAtom); // Lấy hàm setUser từ authAtom
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -37,6 +45,7 @@ const Login = () => {
         duration: 3000,
         isClosable: true,
       });
+      setIsLoading(false);
       return;
     }
 
@@ -45,10 +54,10 @@ const Login = () => {
         email,
         password,
       });
-      console.log("Response FE: ",response.data);
+      console.log("Response FE: ", response.data);
 
-      // Lưu access token vào 
-      localStorage.setItem('accessToken', response.data.accessToken)
+      // Gọi hàm login từ authATom
+      login(response.data.accessToken); // Cập nhật accessToken vào localStorage và userAtom 
       toaster.create({
         title: 'Login Successful',
         description: 'You have been logged in successfully.',
@@ -84,7 +93,7 @@ const Login = () => {
               <Box>
                 <label fontWeight="medium"> Email</label>
                 <Input
-                  type="text"
+                  type="email"
                   placeholder="Your username or email"
                   size="lg"
                   value={email}
@@ -122,7 +131,7 @@ const Login = () => {
             </Stack>
 
             <Text textAlign="center" pt={4}>
-              Don't have an account?{' '}
+              Dont have an account?{' '}
               <Link color="blue.500" fontWeight="semibold" onClick={() => navigate('/register')}>
                 Sign Up
               </Link>

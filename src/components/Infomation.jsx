@@ -24,7 +24,7 @@ export const Infomation = () => {
         toaster.create({
           title: 'Logout Successful',
           description: 'You have been logged out.',
-          status: 'success',
+          type: 'success',
           duration: 3000,
           isClosable: true,
         });

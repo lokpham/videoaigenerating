@@ -1,4 +1,8 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import axios from "axios";
+import { useAtom } from "jotai";
+import { accessTokenAtom } from "@/atoms/authAtom";
+import { useNavigate } from "react-router";
 
 const api = axios.create({
   baseURL:  import.meta.env.REACT_APP_API_URL || 'http://localhost:5000/api',
@@ -29,6 +33,7 @@ api.interceptors.response.use(
 
 // Hàm để refresh token và thử lại yêu cầu
 const refreshTokenAndRetry = async (originalConfig) => {
+  const [, setAccessToken] = useAtom(accessTokenAtom);
   try {
     const response = await api.post('/auth/refresh');
     const { accessToken } = response.data;
@@ -37,7 +42,10 @@ const refreshTokenAndRetry = async (originalConfig) => {
     return api(originalConfig);
   } catch (err) {
     localStorage.removeItem('accessToken');
-    window.location.href = '/login'; // Chuyển hướng về login nếu refresh token thất bại
+    // Dùng navigate thay vì window.location.href
+    setAccessToken(null);
+    const navigate = useNavigate();
+    navigate('/login', { state: { error: "Session expired, please login again" } });
     return Promise.reject(err);
   }
 };

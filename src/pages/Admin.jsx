@@ -1,21 +1,14 @@
-import { useState } from 'react';
 import { 
   Box,
   Heading,
   Flex,
   VStack,
-  Text ,
-  Icon,
-  Image,
 } from "@chakra-ui/react"
-import { 
-  FaHome, 
-  FaTable, 
-  FaUserFriends, 
-  FaSignInAlt,
-  FaSignOutAlt 
-} from 'react-icons/fa';
-import { HeaderAdmin } from '@/components/HeaderAdmin';
+
+import { HeaderAdmin } from '@/components/admin/HeaderAdmin';
+import { useState } from 'react';
+import SidebarAdmin from "@/components/admin/SidebarAdmin";
+
 
 const initialUsers = [
   { 
@@ -77,47 +70,15 @@ const AdminDashboard = () => {
   };
 
   return (
-    <Flex h='100vh' bg='#1b1b38'>
+    <Flex h='100vh' bg='white'>
       {/* Thanh nav */}
       <Box
-        w="250px" 
-        bg="#070b26" 
-        color="white" 
-        p={5}
-        m={4}
+        shadow='xs'
+        m='2'
         borderRadius='4xl'
+        borderColor="blue.800"
       >
-        <Heading size="md" mb={10} textAlign='center'>
-            <Image 
-              src="logo.png" 
-              alt="Logo"
-              w='50px'
-              h='50px'
-              m='auto'
-            />
-          </Heading>
-        <VStack>
-        {[
-            { icon: FaHome, text: 'Tài khoản người dùng' },
-            { icon: FaTable, text: 'Nhật ký sử dụng' },
-            { icon: FaUserFriends, text: 'Thông tin ' },
-            { icon: FaSignInAlt, text: 'Đăng nhập' },
-            { icon: FaSignOutAlt, text: 'Đăng xuất' }
-          ].map((item, index) => (
-            <Flex
-              w='full' 
-              key={index} 
-              alignItems="center" 
-              p={2} 
-              borderRadius="md"
-              _hover={{ bg: 'gray.700' }}
-              bg={item.text === 'Tables' ? 'purple.500' : 'transparent'}
-            >
-              <Icon as={item.icon} mr={3} />
-              <Text>{item.text}</Text>
-            </Flex>
-          ))}
-        </VStack>
+        <SidebarAdmin/>
       </Box>
       {/* Thông tin cụ thể */}
       <Box flex='1' p={6}>

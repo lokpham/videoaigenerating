@@ -9,17 +9,20 @@ import {
   LuSettings , 
   LuLogOut , 
   LuUser , 
-  LuDock  
 } from 'react-icons/lu';
 import { useNavigate } from 'react-router';
 import { toaster } from '@/components/ui/toaster';
-import api from '@/api'
+import { useAtom } from 'jotai';
+import { logoutAtom } from "@/atoms/authAtom";
 
 export const Infomation = () => {
+
   const navigate = useNavigate()
+  const [, logout] = useAtom(logoutAtom)
+
   const handleLogout = async () => {
       try {
-        await api.post('/auth/logout');
+        await logout();
         localStorage.removeItem('accessToken');
         toaster.create({
           title: 'Logout Successful',
@@ -51,7 +54,7 @@ export const Infomation = () => {
           shape="rounded"
         >
           <Avatar.Fallback name="User name" />
-          <Avatar.Image src="https://bit.ly/sage-adebayo" />
+          <Avatar.Image />
         </Avatar.Root>
       </Menu.Trigger>
       <Portal>
@@ -80,19 +83,9 @@ export const Infomation = () => {
                 }}
               >
                 <LuUser size={16} />
-                My Profile
-              </Menu.Item>
-              <Menu.Item 
-                _hover={{ 
-                  bg: 'blue.50', 
-                  color: 'blue.500' 
-                }}
-              >
-                <LuDock  size={16} />
-                Billing
+                Profile
               </Menu.Item>
             </Menu.ItemGroup>
-                    
             <Menu.ItemGroup title="Account">
               <Menu.Item 
                 _hover={{ 

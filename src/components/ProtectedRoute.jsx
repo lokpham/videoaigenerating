@@ -1,15 +1,20 @@
+/* eslint-disable react/prop-types */
 import { Navigate } from "react-router";
 import { useAtom } from "jotai";
 import { 
-  accessTokenAtom
+  accessTokenAtom,
+  userAtom,
  } from "@/atoms/authAtom";
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, requiredRole }) => {
   const [accessToken] = useAtom(accessTokenAtom); // 
+  const [user] = useAtom(userAtom); // Lấy thông tin người dùng từ atom
   if(!accessToken) {
-    // Nếu không có accessToken, điều hướng đến trang đăng nhập
     return <Navigate to="/login" />;
   }
-  return children; // Nếu có accessToken, hiển thị nội dung của route
+  if(requiredRole && (!user?.roles || !user.roles.includes(requiredRole))) {
+    return <Navigate to="/admin" replace/>;
+  }
+  return children; 
 }
 
 export default ProtectedRoute;

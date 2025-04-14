@@ -65,7 +65,7 @@ const Login = () => {
         duration: 1000, 
         isClosable: true,
       });
-      navigate('/generator');
+      navigate('/video/create');
     } catch (error) {
       console.error("Login error:", error.response?.data); // Thêm log để debug
       toaster.create({

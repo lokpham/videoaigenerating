@@ -1,11 +1,28 @@
 import { atom } from 'jotai';
 import api from '@/api';
 
+// Lấy accessToken
 export const accessTokenAtom = atom(localStorage.getItem('accessToken') || null);
 
 export const userAtom = atom(null);
 
 export const loadingAtom = atom(true);
+
+
+export const decodeToken = (token) => {
+  if (!token) return null;
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  // eslint-disable-next-line no-unused-vars
+  } catch (e) {
+    return null;
+  }
+};
 
 export const loginAtom = atom(
   null,

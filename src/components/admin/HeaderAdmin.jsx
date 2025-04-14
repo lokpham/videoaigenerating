@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { 
   HStack,
   Heading,
@@ -7,21 +8,25 @@ import {
   Flex,
 
  } from "@chakra-ui/react"
-import { FaSearch, FaUserCircle, FaCog } from "react-icons/fa";
+import { FaSearch, FaUserCircle } from "react-icons/fa";
 
-export const HeaderAdmin = () => {
+export const HeaderAdmin = ({ searchTerm, setSearchTerm}) => {
 
   return (
     <Flex
       color='white'
       justifyContent='space-between'
     >
-      <Heading>
-        Name Pages  
+      <Heading color="black">
       </Heading>
       <HStack>
         <InputGroup startElement={<FaSearch  />}>
-          <Input placeholder="Search contacts" />
+          <Input 
+            placeholder="Search contacts" 
+            color='black' 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </InputGroup>
 
         <Button 
@@ -32,12 +37,6 @@ export const HeaderAdmin = () => {
           Sign In
         </Button>
 
-        <Button
-          borderRadius='2xl'
-          bg='transparent'
-        >
-          <FaCog />
-        </Button>
       </HStack>
     </Flex>
   )

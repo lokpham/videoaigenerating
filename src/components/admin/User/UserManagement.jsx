@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { 
   Box, Heading, Flex, VStack, Button 
 } from "@chakra-ui/react"

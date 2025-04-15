@@ -1,95 +1,114 @@
-import { 
+import {
   Box,
   Heading,
   Flex,
   VStack,
-} from "@chakra-ui/react"
+  Stat,
+  StatLabel,
+  StatNumber,
+  SimpleGrid,
+  Text,
+  Spinner,
+  Card,
+  CardHeader,
+  CardBody
+} from "@chakra-ui/react";
 
 import { HeaderAdmin } from '@/components/admin/HeaderAdmin';
-import { useState } from 'react';
 import SidebarAdmin from "@/components/admin/SidebarAdmin";
-
-
-const initialUsers = [
-  { 
-    id: 1, 
-    username: 'admin1', 
-    email: 'admin1@example.com', 
-    role: 'Admin',
-    chatHistory: [
-      { date: '2024-03-25', duration: '30 phút', videoLink: '/videos/session1.mp4' },
-      { date: '2024-03-26', duration: '45 phút', videoLink: '/videos/session2.mp4' }
-    ]
-  },
-  { 
-    id: 2, 
-    username: 'user1', 
-    email: 'user1@example.com', 
-    role: 'User',
-    chatHistory: [
-      { date: '2024-03-24', duration: '15 phút', videoLink: '/videos/session3.mp4' }
-    ]
-  }
-];
+import { useEffect, useState } from 'react';
+import api from "@/api";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const AdminDashboard = () => {
-  const [users, setUsers] = useState(initialUsers);
-  const [newUser, setNewUser] = useState({
-    username: '',
-    email: '',
-    role: ''
-  });
+  // State lưu dữ liệu thống kê từ API
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewUser(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleAddUser = () => {
-    const userToAdd = {
-      ...newUser,
-      id: users.length + 1,
-      chatHistory: []
+  // Gọi API lấy dữ liệu thống kê khi component được mount
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await api.get("/api/dashboard-stats"); // Gọi API
+        setStats(response.data); // Cập nhật state với dữ liệu trả về
+      } catch (error) {
+        console.error("Lỗi khi tải dữ liệu dashboard:", error);
+      } finally {
+        setLoading(false); // Dừng hiển thị loading spinner
+      }
     };
 
-    setUsers(prev => [...prev, userToAdd]);
-    
-    // Reset form
-    setNewUser({
-      username: '',
-      email: '',
-      role: ''
-    });
-  };
+    fetchStats();
+  }, []);
 
-  const handleDeleteUser = (userId) => {
-    setUsers(prev => prev.filter(user => user.id !== userId));
-  };
+  // Dữ liệu biểu đồ line (video theo từng ngày trong tuần)
+  const chartData = stats?.weeklyVideoStats || [];
 
   return (
     <Flex h='100vh' bg='white'>
-      {/* Thanh nav */}
-      <Box
-        shadow='xs'
-        m='2'
-        borderRadius='4xl'
-        borderColor="blue.800"
-      >
-        <SidebarAdmin/>
+      {/* Sidebar bên trái */}
+      <Box shadow='xs' m='2' borderRadius='4xl' borderColor="blue.800">
+        <SidebarAdmin />
       </Box>
-      {/* Thông tin cụ thể */}
-      <Box flex='1' p={6}>
-        <VStack>
-          <Heading size="lg" mb={4} w='full'>
-            <HeaderAdmin/>
-          </Heading>
-          {/* Thông tin các tabs */}
-          <Box flex='1'>
 
-          </Box>
+      {/* Nội dung chính bên phải */}
+      <Box flex='1' p={6}>
+        <VStack align="stretch">
+          {/* Header phía trên */}
+          <Heading size="lg" mb={4}>
+            <HeaderAdmin />
+          </Heading>
+
+          {/* Nếu đang loading thì hiển thị spinner */}
+          {loading ? (
+            <Spinner size="xl" alignSelf="center" />
+          ) : (
+            <>
+              {/* Các chỉ số tổng quan */}
+              <SimpleGrid columns={[1, 2, 2, 4]} spacing={6} mb={8}>
+                <Stat bg="gray.50" p={4} borderRadius="xl" shadow="md">
+                  <StatLabel>Tổng số người dùng</StatLabel>
+                  <StatNumber>{stats.totalUsers}</StatNumber>
+                </Stat>
+
+                <Stat bg="gray.50" p={4} borderRadius="xl" shadow="md">
+                  <StatLabel>Tổng số video</StatLabel>
+                  <StatNumber>{stats.totalVideos}</StatNumber>
+                </Stat>
+
+                <Stat bg="gray.50" p={4} borderRadius="xl" shadow="md">
+                  <StatLabel>Video tạo trong tuần</StatLabel>
+                  <StatNumber>{stats.weeklyVideos}</StatNumber>
+                </Stat>
+
+                <Stat bg="gray.50" p={4} borderRadius="xl" shadow="md">
+                  <StatLabel>Top User</StatLabel>
+                  <StatNumber>{stats.topUser?.name}</StatNumber>
+                  <Text fontSize="sm" color="gray.500">
+                    {stats.topUser?.videoCount} videos
+                  </Text>
+                </Stat>
+              </SimpleGrid>
+
+              {/* Biểu đồ đường thể hiện video theo tuần */}
+              <Card>
+                <CardHeader>
+                  <Heading size="md">Thống kê video theo tuần</Heading>
+                </CardHeader>
+                <CardBody>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="day" /> {/* ngày trong tuần */}
+                      <YAxis />
+                      <Tooltip />
+                      <Line type="monotone" dataKey="count" stroke="#3182CE" strokeWidth={2} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardBody>
+              </Card>
+            </>
+          )}
         </VStack>
       </Box>
     </Flex>

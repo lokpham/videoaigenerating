@@ -2,7 +2,7 @@
 import { Box, Flex, Heading, VStack, Text } from "@chakra-ui/react";
 import { NavLink, useNavigate } from "react-router";
 import { FaTable, FaUserFriends, FaVideo, FaSignOutAlt } from "react-icons/fa";
-import { IoMdSettings } from "react-icons/io";
+// import { IoMdSettings } from "react-icons/io";
 import { useSetAtom } from "jotai";
 import { logoutAtom } from "@/atoms/authAtom"; // đường dẫn import tùy cấu trúc dự án
 
@@ -78,8 +78,8 @@ const SidebarAdmin = ({ onItemClick }) => {
       <VStack spacing={1} align="stretch">
         <NavItem icon={<FaTable />} label="Dashboard" to="/admin" />
         <NavItem icon={<FaUserFriends />} label="Tài khoản" to="/admin/users" />
-        <NavItem icon={<FaVideo />} label="Video" to="/admin/video" />
-        <NavItem icon={<IoMdSettings />} label="Setting" to="/admin/setting" />
+        <NavItem icon={<FaVideo />} label="Video" to="/admin/videos" />
+        {/* <NavItem icon={<IoMdSettings />} label="Setting" to="/admin/setting" /> */}
         <LogoutItem icon={<FaSignOutAlt />} label="Log Out" />
       </VStack>
     </Box>

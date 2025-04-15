@@ -9,6 +9,8 @@ import Register from '@/pages/Register';
 import VideoListPage from "@/pages/VideoListPage";
 import UserManagement from "@/components/admin/User/UserManagement";
 import UserForm from "@/components/admin/User/UserForm";
+import VideoManagement from "@/components/admin/Video/VideoManagement";
+import SettingsPage from "@/components/admin/Setting/Setting";
 
 import { useAtom } from "jotai";
 import { 
@@ -30,14 +32,24 @@ const LoadingFallback = () => (
 
 // eslint-disable-next-line react/prop-types
 const AppRoutes = (accessToken) => {
+  const [user] = useAtom(userAtom);
   const [loading] = useAtom(loadingAtom);
   if(loading) return <LoadingFallback />;
+
+  const redirectPath = () => {
+    if (!accessToken || !user) return "/login";
+
+    const roles = Array.isArray(user?.roles) ? user.roles : [user?.roles].filter(Boolean);
+  
+    if (roles.includes("admin")) return "/admin";
+    return "/video/create";
+  };
 
   return (
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
         <Route path="/" element={
-          <Navigate to={accessToken ? "/video/create" : "/login"} replace/> } 
+          <Navigate to={redirectPath()} replace/> } 
         />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -61,7 +73,16 @@ const AppRoutes = (accessToken) => {
             <UserForm />
           </ProtectedRoute>
         } /> 
-
+        <Route path="/admin/videos" element={          
+          <ProtectedRoute requiredRole='admin'>
+            <VideoManagement />
+          </ProtectedRoute>
+        } /> 
+        <Route path="/admin/setting" element={          
+          <ProtectedRoute requiredRole='admin'>
+            <SettingsPage />
+          </ProtectedRoute>
+        } /> 
         <Route path="/video/create" element={
           <ProtectedRoute>
             <VideoGenerate />
@@ -98,7 +119,6 @@ const Default = () => {
         }
       } catch (error) {
         console.error("Token decoding failed:", error.message);
-        // Xử lý token không hợp lệ: xóa user và accessToken
         setUser(null);
         // Có thể thêm logic để xóa accessToken khỏi localStorage hoặc atom
         // localStorage.removeItem("accessToken"); // Nếu lưu token trong localStorage
@@ -110,7 +130,7 @@ const Default = () => {
     setLoading(false);
   }, [accessToken, setUser, setLoading]);
   return (
-
+    // console.log("User:", user),
     <Provider defaultTheme="light">
       <BrowserRouter>
       <Box minH="100vh">

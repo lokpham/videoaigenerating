@@ -30,6 +30,7 @@ export const HeaderAdmin = ({ searchTerm, setSearchTerm}) => {
         </InputGroup>
 
         <Button 
+          color="blackAlpha.800"
           borderRadius='2xl'
           bg='transparent'
         >

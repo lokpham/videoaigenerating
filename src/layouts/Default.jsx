@@ -10,7 +10,6 @@ import VideoListPage from "@/pages/VideoListPage";
 import UserManagement from "@/components/admin/User/UserManagement";
 import UserForm from "@/components/admin/User/UserForm";
 import VideoManagement from "@/components/admin/Video/VideoManagement";
-import SettingsPage from "@/components/admin/Setting/Setting";
 
 import { useAtom } from "jotai";
 import { 
@@ -76,11 +75,6 @@ const AppRoutes = (accessToken) => {
         <Route path="/admin/videos" element={          
           <ProtectedRoute requiredRole='admin'>
             <VideoManagement />
-          </ProtectedRoute>
-        } /> 
-        <Route path="/admin/setting" element={          
-          <ProtectedRoute requiredRole='admin'>
-            <SettingsPage />
           </ProtectedRoute>
         } /> 
         <Route path="/video/create" element={

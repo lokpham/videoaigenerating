@@ -4,14 +4,11 @@ import {
   Flex,
   VStack,
   Stat,
-  StatLabel,
-  StatNumber,
   SimpleGrid,
   Text,
   Spinner,
   Card,
-  CardHeader,
-  CardBody
+  FormatNumber
 } from "@chakra-ui/react";
 
 import { HeaderAdmin } from '@/components/admin/HeaderAdmin';
@@ -29,7 +26,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await api.get("/api/dashboard-stats"); // Gọi API
+        const response = await api.get("/admin/dashboard-stats"); // Gọi API
         setStats(response.data); // Cập nhật state với dữ liệu trả về
       } catch (error) {
         console.error("Lỗi khi tải dữ liệu dashboard:", error);
@@ -66,36 +63,44 @@ const AdminDashboard = () => {
             <>
               {/* Các chỉ số tổng quan */}
               <SimpleGrid columns={[1, 2, 2, 4]} spacing={6} mb={8}>
-                <Stat bg="gray.50" p={4} borderRadius="xl" shadow="md">
-                  <StatLabel>Tổng số người dùng</StatLabel>
-                  <StatNumber>{stats.totalUsers}</StatNumber>
-                </Stat>
+                <Stat.Root bg="gray.50" p={4} borderRadius="xl" shadow="md">
+                  <Stat.Label>Tổng số người dùng</Stat.Label>
+                  <Stat.ValueText>
+                    <FormatNumber value={stats.totalUsers} notation="compact" compactDisplay="short" />
+                  </Stat.ValueText>
+                </Stat.Root>
 
-                <Stat bg="gray.50" p={4} borderRadius="xl" shadow="md">
-                  <StatLabel>Tổng số video</StatLabel>
-                  <StatNumber>{stats.totalVideos}</StatNumber>
-                </Stat>
+                <Stat.Root bg="gray.50" p={4} borderRadius="xl" shadow="md">
+                  <Stat.Label>Tổng số video</Stat.Label>
+                  <Stat.ValueText>
+                    <FormatNumber value={stats.totalVideos} notation="compact" compactDisplay="short" />
+                  </Stat.ValueText>
+                </Stat.Root>
 
-                <Stat bg="gray.50" p={4} borderRadius="xl" shadow="md">
-                  <StatLabel>Video tạo trong tuần</StatLabel>
-                  <StatNumber>{stats.weeklyVideos}</StatNumber>
-                </Stat>
+                <Stat.Root bg="gray.50" p={4} borderRadius="xl" shadow="md">
+                  <Stat.Label>Video tạo trong tuần</Stat.Label>
+                  <Stat.ValueText>
+                    <FormatNumber value={stats.weeklyVideos} notation="compact" compactDisplay="short" />
+                  </Stat.ValueText>
+                </Stat.Root>
 
-                <Stat bg="gray.50" p={4} borderRadius="xl" shadow="md">
-                  <StatLabel>Top User</StatLabel>
-                  <StatNumber>{stats.topUser?.name}</StatNumber>
+                <Stat.Root bg="gray.50" p={4} borderRadius="xl" shadow="md">
+                  <Stat.Label>Top User</Stat.Label>
+                  <Stat.ValueText>
+                    <FormatNumber value={stats.topUser?.name} notation="compact" compactDisplay="short" />
+                  </Stat.ValueText>
                   <Text fontSize="sm" color="gray.500">
                     {stats.topUser?.videoCount} videos
                   </Text>
-                </Stat>
+                </Stat.Root>
               </SimpleGrid>
 
               {/* Biểu đồ đường thể hiện video theo tuần */}
-              <Card>
-                <CardHeader>
+              <Card.Root bg="white" shadow="md" borderRadius="xl">
+                <Card.Header>
                   <Heading size="md">Thống kê video theo tuần</Heading>
-                </CardHeader>
-                <CardBody>
+                </Card.Header>
+                <Card.Body>
                   <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -105,8 +110,8 @@ const AdminDashboard = () => {
                       <Line type="monotone" dataKey="count" stroke="#3182CE" strokeWidth={2} />
                     </LineChart>
                   </ResponsiveContainer>
-                </CardBody>
-              </Card>
+                </Card.Body>
+              </Card.Root>
             </>
           )}
         </VStack>

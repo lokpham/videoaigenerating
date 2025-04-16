@@ -18,10 +18,10 @@ import {
   videosAtom, 
   videosLoadingAtom, 
   totalPagesAtom,
-  searchTermAtom,
-  currentPageAtom,
-  startDateAtom,
-  endDateAtom,
+  // searchTermAtom,
+  // currentPageAtom,
+  // startDateAtom,
+  // endDateAtom,
 } from "@/atoms/videoAtom";
 import api from "@/api";
 import { toaster } from "@/components/ui/toaster";

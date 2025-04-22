@@ -87,7 +87,7 @@ const AdminDashboard = () => {
                 <Stat.Root bg="gray.50" p={4} borderRadius="xl" shadow="md">
                   <Stat.Label>Top User</Stat.Label>
                   <Stat.ValueText>
-                    <FormatNumber value={stats.topUser?.name} notation="compact" compactDisplay="short" />
+                    <Text fontWeight="bold">{stats.topUser.name}</Text>
                   </Stat.ValueText>
                   <Text fontSize="sm" color="gray.500">
                     {stats.topUser?.videoCount} videos

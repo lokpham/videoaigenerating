@@ -124,7 +124,6 @@ const Default = () => {
     setLoading(false);
   }, [accessToken, setUser, setLoading]);
   return (
-    // console.log("User:", user),
     <Provider defaultTheme="light">
       <BrowserRouter>
       <Box minH="100vh">

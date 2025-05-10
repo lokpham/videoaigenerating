@@ -16,6 +16,6 @@ export const Avatar = React.forwardRef(function Avatar(props, ref) {
       {children}
     </ChakraAvatar.Root>
   )
-})
+})  
 
 export const AvatarGroup = ChakraAvatarGroup
